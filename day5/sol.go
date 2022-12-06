@@ -14,9 +14,16 @@ func main() {
 	stacks := parseListofStacks(before)
 	moves := strings.Split(after, "\n")
 	for _, line := range moves {
-		performMove(stacks, line)
+		performMove(stacks, line, false)
 	}
 	fmt.Println("part 1:", getTop(stacks))
+
+	stacks = parseListofStacks(before)
+	moves = strings.Split(after, "\n")
+	for _, line := range moves {
+		performMove(stacks, line, true)
+	}
+	fmt.Println("part 2:", getTop(stacks))
 }
 
 type stack struct {
@@ -69,11 +76,21 @@ func reverseStacks(s []stack) []stack {
 	return newStacks
 }
 
-func performMove(stacks []stack, line string) {
+func performMove(stacks []stack, line string, inOrder bool) {
 	split := strings.Split(line, " ")
 	count, from, to := toInt(split[1]), toInt(split[3])-1, toInt(split[5])-1
-	for i := 0; i < count; i++ {
-		stacks[to].push(stacks[from].pop())
+	if inOrder {
+		tempStack := stack{}
+		for i := 0; i < count; i++ {
+			tempStack.push(stacks[from].pop())
+		}
+		for i := 0; i < count; i++ {
+			stacks[to].push(tempStack.pop())
+		}
+	} else {
+		for i := 0; i < count; i++ {
+			stacks[to].push(stacks[from].pop())
+		}
 	}
 }
 
