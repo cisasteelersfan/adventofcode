@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -16,6 +17,16 @@ func main() {
 
 	sum := getSumDirsUnder(g, 100_000)
 	fmt.Println("part 1:", sum)
+
+	dirs := getDirSizes(g)
+	sort.Ints(dirs)
+	target := 30000000 - (70000000 - dirs[len(dirs)-1])
+	for i := 0; i < len(dirs); i++ {
+		if dirs[i] > target {
+			fmt.Println("part 2:", dirs[i])
+			return
+		}
+	}
 }
 
 type node struct {
@@ -24,6 +35,25 @@ type node struct {
 	size     int
 	children []*node
 	parent   *node
+}
+
+func getDirSizes(g *node) []int {
+	if g == nil {
+		return nil
+	}
+	dirs := make([]int, 0)
+	if g.isDir {
+		dirs = append(dirs, g.size)
+	}
+	for _, n := range g.children {
+		s := getDirSizes(n)
+		if s != nil {
+			for i := 0; i < len(s); i++ {
+				dirs = append(dirs, s[i])
+			}
+		}
+	}
+	return dirs
 }
 
 func getSumDirsUnder(g *node, under int) int {
