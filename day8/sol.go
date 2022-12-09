@@ -15,6 +15,82 @@ func main() {
 	trees := parseTrees(raw)
 	visible := findVisible(trees)
 	fmt.Println("part 1:", getSum(visible))
+	fmt.Println("part 2:", getTopScore(trees))
+}
+
+func getTopScore(trees [][]int) int {
+	topScore := 0
+	rows := len(trees)
+	for r := 0; r < rows; r++ {
+		for c := 0; c < rows; c++ {
+			score := calcScore(trees, r, c)
+			if score > topScore {
+				topScore = score
+			}
+		}
+	}
+	return topScore
+}
+
+func calcScore(trees [][]int, r, c int) int {
+	rows := len(trees)
+	if r <= 0 || r >= rows-1 || c <= 0 || c >= rows-1 {
+		return 0
+	}
+	score := 1
+	treesSeen := 0
+	// to right
+	for row := r + 1; row < rows; row++ {
+		treesSeen++
+		if trees[row][c] >= trees[r][c] {
+			break
+		}
+	}
+	if treesSeen == 0 {
+		return 0
+	} else {
+		score *= treesSeen
+	}
+	// to left
+	treesSeen = 0
+	for row := r - 1; row >= 0; row-- {
+		treesSeen++
+		if trees[row][c] >= trees[r][c] {
+			break
+		}
+	}
+	if treesSeen == 0 {
+		return 0
+	} else {
+		score *= treesSeen
+	}
+	// to up
+	treesSeen = 0
+	for col := c + 1; col < rows; col++ {
+		treesSeen++
+		if trees[r][col] >= trees[r][c] {
+			break
+		}
+	}
+	if treesSeen == 0 {
+		return 0
+	} else {
+		score *= treesSeen
+	}
+	// to down
+	treesSeen = 0
+	for col := c - 1; col >= 0; col-- {
+		treesSeen++
+		if trees[r][col] >= trees[r][c] {
+			break
+		}
+	}
+	if treesSeen == 0 {
+		return 0
+	} else {
+		score *= treesSeen
+	}
+	return score
 }
 
 func getSum(grid [][]bool) int {
