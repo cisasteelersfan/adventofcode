@@ -10,24 +10,25 @@ import (
 func main() {
 	dat, _ := os.ReadFile("day9/input.txt")
 	raw := strings.Split(string(dat), "\n")
-	r := rope{visited: make(map[point]int)}
-	r.visited[point{0, 0}]++
+	r := rope{visited: make(map[point]bool)}
+	r.visited[point{0, 0}] = true
 	for _, line := range raw {
 		direction, num := parseLine(line)
 		for i := 0; i < num; i++ {
 			switch direction {
 			case "R":
-				r.right()
+				r.head.col++
 			case "L":
-				r.left()
+				r.head.col--
 			case "D":
-				r.down()
+				r.head.row--
 			case "U":
-				r.up()
+				r.head.row++
 			}
+			r.moveTail()
 		}
 	}
-	fmt.Println("part 1:", len(r.visited))
+	fmt.Println("part 1:", len(r.visited)) // 6376
 }
 
 type point struct {
@@ -36,43 +37,37 @@ type point struct {
 
 type rope struct {
 	head, tail point
-	visited    map[point]int
+	visited    map[point]bool
 }
 
-func (r *rope) up() {
-	r.head.row++
-	if r.head.row == r.tail.row+2 {
-		r.tail.row = r.head.row - 1
-		r.tail.col = r.head.col
-		r.visited[r.tail]++
-	}
-}
-
-func (r *rope) down() {
-	r.head.row--
-	if r.head.row == r.tail.row-2 {
-		r.tail.row = r.head.row + 1
-		r.tail.col = r.head.col
-		r.visited[r.tail]++
-	}
-}
-
-func (r *rope) left() {
-	r.head.col--
-	if r.head.col == r.tail.col-2 {
-		r.tail.col = r.head.col + 1
+func (r *rope) moveTail() {
+	if r.shouldMoveRight(r.tail) {
 		r.tail.row = r.head.row
-		r.visited[r.tail]++
-	}
-}
-
-func (r *rope) right() {
-	r.head.col++
-	if r.head.col == r.tail.col+2 {
 		r.tail.col = r.head.col - 1
+	} else if r.shouldMoveLeft(r.tail) {
 		r.tail.row = r.head.row
-		r.visited[r.tail]++
+		r.tail.col = r.head.col + 1
+	} else if r.shouldMoveDown(r.tail) {
+		r.tail.col = r.head.col
+		r.tail.row = r.head.row + 1
+	} else if r.shouldMoveUp(r.tail) {
+		r.tail.col = r.head.col
+		r.tail.row = r.head.row - 1
 	}
+	r.visited[r.tail] = true
+}
+
+func (r rope) shouldMoveRight(p point) bool {
+	return p.col == r.head.col-2
+}
+func (r rope) shouldMoveLeft(p point) bool {
+	return p.col == r.head.col+2
+}
+func (r rope) shouldMoveUp(p point) bool {
+	return p.row == r.head.row-2
+}
+func (r rope) shouldMoveDown(p point) bool {
+	return p.row == r.head.row+2
 }
 
 func parseLine(l string) (string, int) {
