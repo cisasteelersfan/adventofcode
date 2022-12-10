@@ -24,6 +24,25 @@ func main() {
 		}
 	}
 	fmt.Println("part 1:", getSumStrengths(clockToRegister))
+	fmt.Print("part 2:\n", renderCRT(clockToRegister), "\n") // ZRARLFZU
+}
+
+func renderCRT(clockToRegister []int) string {
+	pixels := make([][]string, 6)
+	lines := make([]string, 6)
+	for i := range pixels {
+		pixels[i] = make([]string, 40)
+		for clock, pos := i*40, 0; pos < 40; clock, pos = clock+1, pos+1 {
+			register := clockToRegister[clock]
+			if register == pos || register == pos-1 || register == pos+1 {
+				pixels[i][pos] = "#"
+			} else {
+				pixels[i][pos] = "."
+			}
+		}
+		lines[i] = strings.Join(pixels[i], "")
+	}
+	return strings.Join(lines, "\n")
 }
 
 func getSumStrengths(clockToRegister []int) int {
