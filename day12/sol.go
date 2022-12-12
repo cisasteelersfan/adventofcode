@@ -2,15 +2,43 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"os"
 	"strings"
 )
+
+const MaxInt = int(math.MaxUint >> 1)
 
 func main() {
 	dat, _ := os.ReadFile("day12/input.txt")
 	g := parseGraph(string(dat))
 	start, end := getStart(g), getEnd(g)
 	fmt.Println("part 1:", findShortestPaths(g, start, end))
+	starts := getAs(g)
+	minDist := MaxInt
+	for _, start := range starts {
+		dist := findShortestPaths(g, start, end)
+		if dist < minDist {
+			minDist = dist
+		}
+	}
+	fmt.Println("part 2:", minDist)
+}
+
+func getAs(g graph) []point {
+	as := make([]point, 0)
+	for p, n := range g.nodes {
+		if n.height == 0 {
+			as = append(as, p)
+		}
+	}
+	return as
+}
+
+func clearDists(g graph) {
+	for _, n := range g.nodes {
+		n.dist = -1
+	}
 }
 
 func findShortestPaths(g graph, start, end point) int {
@@ -34,7 +62,7 @@ func findShortestPaths(g graph, start, end point) int {
 			q = append(q, n)
 		}
 	}
-	panic("Didn't encounter end")
+	return MaxInt
 }
 
 func getStart(g graph) point {
