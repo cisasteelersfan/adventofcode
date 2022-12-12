@@ -12,14 +12,24 @@ func main() {
 	dat, _ := os.ReadFile("day11/input.txt")
 	monkeyLines := strings.Split(string(dat), "\n\n")
 
-	monkeys := monkeys{count: len(monkeyLines), monkeys: make(map[int]*monkey)}
+	m := monkeys{count: len(monkeyLines), monkeys: make(map[int]*monkey)}
 	for i, line := range monkeyLines {
-		monkeys.monkeys[i] = parseMonkey(line, &monkeys)
+		m.monkeys[i] = parseMonkey(line, &m, false)
 	}
 	for i := 0; i < 20; i++ {
-		monkeys.advance()
+		m.advance()
 	}
-	fmt.Println("part 1:", getLevel(monkeys))
+	fmt.Println("part 1:", getLevel(m))
+
+	m = monkeys{count: len(monkeyLines), monkeys: make(map[int]*monkey)}
+	for i, line := range monkeyLines {
+		m.monkeys[i] = parseMonkey(line, &m, true)
+	}
+	m.worrymod = m.calcWorrymod()
+	for i := 0; i < 10000; i++ {
+		m.advance()
+	}
+	fmt.Println("part 2:", getLevel(m))
 }
 
 func getLevel(m monkeys) int {
@@ -31,15 +41,16 @@ func getLevel(m monkeys) int {
 	return inspected[len(inspected)-1] * inspected[len(inspected)-2]
 }
 
-func parseMonkey(l string, p *monkeys) *monkey {
+func parseMonkey(l string, p *monkeys, part2 bool) *monkey {
 	s := strings.Split(l, "\n")
 	m := monkey{}
 	m.items = parseItems(s[1])
 	m.operation = parseOps(s[2])
-	m.test = parseTest(s[3])
+	m.testNum = parseTest(s[3])
 	m.trueThrow = parseThrow(s[4])
 	m.falseThrow = parseThrow(s[5])
 	m.monkeys = p
+	m.part2 = part2
 	return &m
 }
 
@@ -67,9 +78,9 @@ func parseOps(s string) func(int) int {
 	panic(fmt.Sprint("uh-oh: op[0]=", op[0]))
 }
 
-func parseTest(s string) func(int) bool {
+func parseTest(s string) int {
 	num, _ := strconv.Atoi(strings.Split(s, "by ")[1])
-	return func(i int) bool { return i%num == 0 }
+	return num
 }
 
 func parseThrow(s string) int {
@@ -78,13 +89,22 @@ func parseThrow(s string) int {
 }
 
 type monkeys struct {
-	count   int
-	monkeys map[int]*monkey
+	count    int
+	monkeys  map[int]*monkey
+	worrymod int
+}
+
+func (m *monkeys) calcWorrymod() int {
+	mod := 1
+	for _, monkey := range m.monkeys {
+		mod *= monkey.testNum
+	}
+	return mod
 }
 
 func (m *monkeys) advance() {
 	for i := 0; i < len(m.monkeys); i++ {
-		m.monkeys[i].processItems()
+		m.monkeys[i].processItems(m.worrymod)
 	}
 }
 
@@ -101,17 +121,23 @@ type monkey struct {
 	operation      func(int) int
 	trueThrow      int
 	falseThrow     int
-	test           func(int) bool
+	testNum        int
+	part2          bool
 }
 
-func (m *monkey) processItems() {
+func (m *monkey) processItems(worrymod int) {
 	if len(m.items) == 0 {
 		return
 	}
 	for _, item := range m.items {
 		m.inspectedCount++
-		worry := m.operation(item) / 3
-		if m.test(worry) {
+		var worry int
+		if m.part2 {
+			worry = m.operation(item) % worrymod
+		} else {
+			worry = m.operation(item) / 3
+		}
+		if worry%m.testNum == 0 {
 			m.monkeys.monkeys[m.trueThrow].items = append(m.monkeys.monkeys[m.trueThrow].items, worry)
 		} else {
 			m.monkeys.monkeys[m.falseThrow].items = append(m.monkeys.monkeys[m.falseThrow].items, worry)
