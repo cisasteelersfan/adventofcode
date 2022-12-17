@@ -19,6 +19,57 @@ func main() {
 	}
 	// fmt.Println("part 1:", findNoBeacons(pairs, 10))
 	fmt.Println("part 1:", findNoBeacons(pairs, 2000000))
+	// fmt.Println("part 2:", findFrequency(pairs, 20))
+	fmt.Println("part 2:", findFrequency(pairs, 4000000))
+}
+
+func findFrequency(pairs []pair, max int) int {
+	// look one outside the perimeter of each square.
+	for _, p := range pairs {
+		for _, posPoint := range p.getPerimeter(max) {
+			couldBePos := true
+			for _, otherPair := range pairs {
+				if getManhattan(posPoint, otherPair.sensor) <= otherPair.getManhattan() {
+					couldBePos = false
+					break
+				}
+			}
+			if couldBePos {
+				// fmt.Println("x", posPoint.x, "y", posPoint.y)
+				return posPoint.y + posPoint.x*4000000
+			}
+		}
+	}
+	panic("didn't find a possible beacon location")
+}
+
+func (p pair) getPerimeter(max int) []point {
+	perimeter := make([]point, 0)
+	m := p.getManhattan()
+	for posX := -2 * m; posX <= 2*m; posX++ {
+		var x, y int
+		if posX == -2*m || posX == 2*m {
+			x, y = p.sensor.x+posX, p.sensor.y
+			if x < 0 || y < 0 || x > max || y > max {
+				continue
+			}
+			perimeter = append(perimeter, point{x, y})
+		} else {
+			posY := m - posX + 1
+			x, y = p.sensor.x+posX, posY+p.sensor.y
+			if x < 0 || y < 0 || x > max || y > max {
+				continue
+			}
+			perimeter = append(perimeter, point{x, y})
+			y = p.sensor.y - posY
+			if y < 0 || y > max {
+				continue
+			}
+			perimeter = append(perimeter, point{x, y})
+		}
+	}
+	// fmt.Println("perimeter", perimeter)
+	return perimeter
 }
 
 func findNoBeacons(pairs []pair, row int) int {
