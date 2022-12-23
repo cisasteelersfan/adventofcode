@@ -27,13 +27,22 @@ func main() {
 		}
 	}
 	for i := 0; i < 10; i++ {
-		for _, e := range b.elves {
-			fmt.Println(e.pos)
-		}
-		fmt.Println()
 		b.simulate()
 	}
 	fmt.Println("part 1:", b.calculateEmpty())
+
+	b = board{make(map[point]*elf), make(map[point]*elf), 0}
+	for row, line := range strings.Split(string(dat), "\n") {
+		for col, char := range line {
+			if char == '#' {
+				b.elves[point{row, col}] = &elf{point{row, col}, point{row, col}}
+			}
+		}
+	}
+	rounds := 1
+	for ; b.simulate(); rounds++ {
+	}
+	fmt.Println("part 2:", rounds)
 }
 
 type board struct {
@@ -62,16 +71,18 @@ func (b *board) calculateEmpty() int {
 	return (maxR-minR+1)*(maxC-minC+1) - len(b.elves)
 }
 
-func (b *board) simulate() {
+func (b *board) simulate() bool {
 	b.proposals = make(map[point]*elf)
 	for _, e := range b.elves {
 		b.updateProposal(e)
 	}
+	moved := false
 	for _, e := range b.elves {
-		b.moveToProposal(e)
+		moved = b.moveToProposal(e) || moved
 	}
 
 	b.firstDirection = (b.firstDirection + 1) % 4
+	return moved
 }
 
 type elf struct {
@@ -80,7 +91,6 @@ type elf struct {
 }
 
 func (b *board) updateProposal(e *elf) {
-	fmt.Println("Considering elf:", e.pos)
 	e.proposal = e.pos
 	r, c := e.pos.row, e.pos.col
 	adjacent := []point{{r - 1, c - 1}, {r - 1, c}, {r - 1, c + 1}, {r, c - 1}, {r, c + 1}, {r + 1, c - 1}, {r + 1, c}, {r + 1, c + 1}}
@@ -92,7 +102,6 @@ func (b *board) updateProposal(e *elf) {
 		}
 	}
 	if !hasAdjacent {
-		fmt.Println("doesn't have adjacent; not moving.")
 		return
 	}
 	direction := b.firstDirection
@@ -100,7 +109,6 @@ func (b *board) updateProposal(e *elf) {
 		proposed := false
 		switch direction {
 		case north:
-			fmt.Println("considering north.")
 			points := []point{{r - 1, c - 1}, {r - 1, c}, {r - 1, c + 1}}
 			foundElf := false
 			for _, p := range points {
@@ -109,32 +117,26 @@ func (b *board) updateProposal(e *elf) {
 				}
 			}
 			if foundElf {
-				fmt.Println("Found elf")
 				break
 			}
 			proposed = true
 			proposal := point{r - 1, c}
 			if otherElf, clash := b.proposals[proposal]; clash {
 				// undo
-				fmt.Println("found clashing proposal at:", otherElf.proposal)
 				otherElf.proposal = otherElf.pos
 			} else {
-				fmt.Println("proposal is:", proposal)
 				e.proposal = proposal
 				b.proposals[proposal] = e
 			}
 		case south:
-			fmt.Println("considering south.")
 			points := []point{{r + 1, c - 1}, {r + 1, c}, {r + 1, c + 1}}
 			foundElf := false
 			for _, p := range points {
-				if found, ok := b.elves[p]; ok {
-					fmt.Println(found.pos)
+				if _, ok := b.elves[p]; ok {
 					foundElf = true
 				}
 			}
 			if foundElf {
-				fmt.Println("Found elf")
 				break
 			}
 			proposed = true
@@ -147,7 +149,6 @@ func (b *board) updateProposal(e *elf) {
 				b.proposals[proposal] = e
 			}
 		case east:
-			fmt.Println("considering east.")
 			points := []point{{r - 1, c + 1}, {r, c + 1}, {r + 1, c + 1}}
 			foundElf := false
 			for _, p := range points {
@@ -156,7 +157,6 @@ func (b *board) updateProposal(e *elf) {
 				}
 			}
 			if foundElf {
-				fmt.Println("Found elf")
 				break
 			}
 			proposed = true
@@ -169,7 +169,6 @@ func (b *board) updateProposal(e *elf) {
 				b.proposals[proposal] = e
 			}
 		case west:
-			fmt.Println("considering west.")
 			points := []point{{r - 1, c - 1}, {r, c - 1}, {r + 1, c - 1}}
 			foundElf := false
 			for _, p := range points {
@@ -178,7 +177,6 @@ func (b *board) updateProposal(e *elf) {
 				}
 			}
 			if foundElf {
-				fmt.Println("Found elf")
 				break
 			}
 			proposed = true
@@ -191,20 +189,23 @@ func (b *board) updateProposal(e *elf) {
 				b.proposals[proposal] = e
 			}
 		}
-		fmt.Println("Changing direction")
 		direction = (direction + 1) % 4
 		if proposed {
-			fmt.Println("Breaking due to proposed.")
 			break
 		}
 	}
 }
 
-func (b *board) moveToProposal(e *elf) {
+func (b *board) moveToProposal(e *elf) bool {
+	moved := true
+	if e.pos == e.proposal {
+		moved = false
+	}
 	oldPos := e.pos
 	e.pos = e.proposal
 	delete(b.elves, oldPos)
 	b.elves[e.pos] = e
+	return moved
 }
 
 type point struct {
