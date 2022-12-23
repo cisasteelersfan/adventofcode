@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"sort"
 	"strings"
 )
 
@@ -13,6 +14,24 @@ func main() {
 
 	part1 := sumPairsInOrder(pairs)
 	fmt.Println("part 1:", part1)
+
+	all := strings.ReplaceAll(string(dat), "\n\n", "\n")
+	allStrings := strings.Split(all, "\n")
+	allStrings = append(allStrings, "[[2]]")
+	allStrings = append(allStrings, "[[6]]")
+	sort.SliceStable(allStrings, func(i, j int) bool {
+		return isInOrder(allStrings[i], allStrings[j])
+	})
+
+	twoIdx, sixIdx := 0, 0
+	for i := 0; i < len(allStrings); i++ {
+		if allStrings[i] == "[[2]]" {
+			twoIdx = i
+		} else if allStrings[i] == "[[6]]" {
+			sixIdx = i
+		}
+	}
+	fmt.Println("part 2:", (twoIdx+1)*(sixIdx+1))
 }
 
 func sumPairsInOrder(s []string) int {
