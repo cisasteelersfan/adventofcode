@@ -13,7 +13,7 @@ func main() {
 	dat, _ := os.ReadFile("day24/input.txt")
 
 	b := parseBoard(string(dat))
-	fmt.Println("part 1:", b.shortestPath())
+	b.shortestPath()
 }
 
 type board struct {
@@ -82,8 +82,8 @@ type node struct {
 	r, c, time int
 }
 
-func (b *board) isWin(r, c int) bool {
-	return r == b.rows-1 && c == b.cols-2
+func (b *board) isWin(r, c, winR, winC int) bool {
+	return r == winR && c == winC
 }
 
 func (b *board) getValidNeighbors(r, c, time int) []node {
@@ -101,23 +101,79 @@ func (b *board) getValidNeighbors(r, c, time int) []node {
 	if r == b.rows-2 && c == b.cols-2 {
 		n = append(n, node{b.rows - 1, b.cols - 2, 0})
 	}
+	if r == 1 && c == 1 {
+		n = append(n, node{0, 1, 0})
+	}
 	if debug {
 		fmt.Println("neighbors:", len(n))
 	}
 	return n
 }
 
-func (b *board) shortestPath() int {
+func (b *board) shortestPath() {
 	time := 0
 	s := make(map[node]bool)
+	s[node{0, 1, 0}] = true
+	for {
+		fmt.Println(time)
+		isWin := false
+		temp := make(map[node]bool)
+		for cur := range s {
+			r, c := cur.r, cur.c
+			if b.isWin(r, c, b.rows-1, b.cols-2) {
+				fmt.Println("part 1:", time)
+				isWin = true
+				break
+			}
+			for _, neighbor := range b.getValidNeighbors(r, c, time+1) {
+				temp[node{neighbor.r, neighbor.c, 0}] = true
+			}
+			if !b.isOverlap(r, c, time+1) {
+				temp[node{r, c, 0}] = true
+			}
+		}
+		time++
+		s = temp
+		if isWin {
+			break
+		}
+	}
+	s = make(map[node]bool)
+	s[node{b.rows - 1, b.cols - 2, 0}] = true
+	for {
+		isWin := false
+		fmt.Println(time)
+		temp := make(map[node]bool)
+		for cur := range s {
+			r, c := cur.r, cur.c
+			if b.isWin(r, c, 0, 1) {
+				fmt.Println("made it back:", time)
+				isWin = true
+				break
+			}
+			for _, neighbor := range b.getValidNeighbors(r, c, time+1) {
+				temp[node{neighbor.r, neighbor.c, 0}] = true
+			}
+			if !b.isOverlap(r, c, time+1) {
+				temp[node{r, c, 0}] = true
+			}
+		}
+		time++
+		s = temp
+		if isWin {
+			break
+		}
+	}
+	s = make(map[node]bool)
 	s[node{0, 1, 0}] = true
 	for {
 		fmt.Println(time)
 		temp := make(map[node]bool)
 		for cur := range s {
 			r, c := cur.r, cur.c
-			if b.isWin(r, c) {
-				return time
+			if b.isWin(r, c, b.rows-1, b.cols-2) {
+				fmt.Println("part 2:", time)
+				return
 			}
 			for _, neighbor := range b.getValidNeighbors(r, c, time+1) {
 				temp[node{neighbor.r, neighbor.c, 0}] = true
