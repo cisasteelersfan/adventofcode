@@ -14,16 +14,13 @@ func main() {
 	updatesStr := strings.Split(str[1], "\n")
 
 	answerOne := 0
-	for _, updateStr := range updatesStr {
+	notValidIndexes := make([]int, 0)
+	for i, updateStr := range updatesStr {
 		secondNums := getSecondNums(rulesStr, updateStr)
-		fmt.Println("secondNums:", secondNums)
-		fmt.Printf("updateStr: '%s'\n", updateStr)
 		seen := make(map[int]bool)
 		isValid := true
 		for _, num := range getNums(updateStr) {
-			fmt.Println("num", num)
 			if firstNums, ok := secondNums[num]; ok {
-				fmt.Println("firstNums:", firstNums)
 				for firstNum, _ := range firstNums {
 					if _, ok := seen[firstNum]; !ok {
 						isValid = false
@@ -31,6 +28,7 @@ func main() {
 				}
 				if !isValid {
 					fmt.Println("not valid!")
+					notValidIndexes = append(notValidIndexes, i)
 					break
 				}
 			}
@@ -49,12 +47,10 @@ func getSecondNums(s []string, update string) map[int]map[int]bool {
 	for _, num := range getNums(update) {
 		set[num] = true
 	}
-	fmt.Println("set:", set)
 	ans := make(map[int]map[int]bool)
 	for _, line := range s {
 		numStr := strings.Split(line, "|")
 		first, second := getNum(numStr[0]), getNum(numStr[1])
-		fmt.Println("first, second:", first, second)
 		if ok := set[first]; !ok {
 			continue
 		}
@@ -74,7 +70,6 @@ func getMiddle(s string) int {
 	if len(nums)%2 != 1 {
 		panic("Can't find middle; updates isn't odd.")
 	}
-	fmt.Println("nums:", nums)
 	return nums[len(nums)/2]
 }
 
