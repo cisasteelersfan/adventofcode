@@ -24,6 +24,7 @@ func main() {
 			}
 		}
 	}
+	initialRow, initialCol := guard.p.row, guard.p.col
 	visited := make(map[Point]bool)
 
 	for guard.isOnMap(m) {
@@ -46,6 +47,58 @@ func main() {
 		}
 	}
 	fmt.Println("part 1:", len(visited))
+
+	// approach: place 1 obstruction on every blank space. See if he gets in a loop.
+	stuckTimes := 0
+	for p := range m {
+		g := Guard{Point{initialRow, initialCol, false}, 0}
+		if p.obstacle || (g.p.row == p.row && g.p.col == p.col) {
+			continue
+		}
+		fmt.Println("trying obstacle:", p)
+		// try setting this as obstacle
+		mapcopy := copymap(m)
+		mapcopy[Point{p.row, p.col, true}] = true
+		totalSteps := 0
+
+		visited2 := make(map[Point]int) // value is direction
+		for g.isOnMap(mapcopy) {
+			totalSteps++
+			if facing, ok := visited2[g.p]; ok {
+				if facing == g.facing || totalSteps > 10000000 {
+					fmt.Println("Stuck! position:", g)
+					stuckTimes++
+					break
+				}
+			}
+			visited2[g.p] = g.facing
+			nextPos := Point{g.p.row, g.p.col, false}
+			switch g.facing {
+			case 0:
+				nextPos.row--
+			case 1:
+				nextPos.col++
+			case 2:
+				nextPos.row++
+			case 3:
+				nextPos.col--
+			}
+			if mapcopy[Point{nextPos.row, nextPos.col, true}] { // obstacle
+				g.facing = (g.facing + 1) % 4 // turn
+			} else {
+				g.p = nextPos // go forward
+			}
+		}
+	}
+	fmt.Println("part 2:", stuckTimes)
+}
+
+func copymap(m map[Point]bool) map[Point]bool {
+	copy := make(map[Point]bool)
+	for k, v := range m {
+		copy[Point{k.row, k.col, k.obstacle}] = v
+	}
+	return copy
 }
 
 type Guard struct {
