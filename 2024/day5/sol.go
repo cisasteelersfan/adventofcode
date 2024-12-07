@@ -21,7 +21,7 @@ func main() {
 		isValid := true
 		for _, num := range getNums(updateStr) {
 			if firstNums, ok := secondNums[num]; ok {
-				for firstNum, _ := range firstNums {
+				for firstNum := range firstNums {
 					if _, ok := seen[firstNum]; !ok {
 						isValid = false
 					}
