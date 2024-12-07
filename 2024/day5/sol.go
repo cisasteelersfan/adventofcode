@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -14,7 +15,7 @@ func main() {
 	updatesStr := strings.Split(str[1], "\n")
 
 	answerOne := 0
-	notValidIndexes := make([]int, 0)
+	invalidIndexes := make([]int, 0)
 	for i, updateStr := range updatesStr {
 		secondNums := getSecondNums(rulesStr, updateStr)
 		seen := make(map[int]bool)
@@ -28,7 +29,7 @@ func main() {
 				}
 				if !isValid {
 					fmt.Println("not valid!")
-					notValidIndexes = append(notValidIndexes, i)
+					invalidIndexes = append(invalidIndexes, i)
 					break
 				}
 			}
@@ -39,8 +40,22 @@ func main() {
 		}
 	}
 	fmt.Println("Part 1:", answerOne)
+
+	part2 := 0
+	for _, invalidIndex := range invalidIndexes {
+		secondNums := getSecondNums(rulesStr, updatesStr[invalidIndex])
+		nums := getNums(updatesStr[invalidIndex])
+		sort.SliceStable(nums, func(i, j int) bool {
+			// returns true if i < j
+			possible := secondNums[nums[j]]
+			return possible[nums[i]]
+		})
+		part2 += getMiddleInt(nums)
+	}
+	fmt.Println("Part 2:", part2)
 }
 
+// returns a map from the second number to the numbers that must come before.
 func getSecondNums(s []string, update string) map[int]map[int]bool {
 	// only include in answer rules that apply to current update.
 	set := make(map[int]bool)
@@ -63,6 +78,10 @@ func getSecondNums(s []string, update string) map[int]map[int]bool {
 		ans[second][first] = true
 	}
 	return ans
+}
+
+func getMiddleInt(nums []int) int {
+	return nums[len(nums)/2]
 }
 
 func getMiddle(s string) int {
