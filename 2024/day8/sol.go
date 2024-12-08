@@ -50,6 +50,41 @@ func main() {
 		}
 	}
 	fmt.Println("part 1:", len(antinodes))
+
+	antinodes = make(map[Point]bool)
+	// find every pair of transmitters of same type.
+	for _, points := range transmitters {
+		if len(points) == 1 {
+			continue
+		}
+		for p1 := range points {
+			for p2 := range points {
+				if p1.r == p2.r && p1.c == p2.c {
+					continue
+				}
+				dr, dc := p1.r-p2.r, p1.c-p2.c
+				r, c := p1.r, p1.c
+				// add transmitters ascending
+				for {
+					if _, ok := m[Point{r, c}]; !ok {
+						break
+					}
+					antinodes[Point{r, c}] = true
+					r, c = r+dr, c+dc
+				}
+				// add transmitters descending
+				r, c = p1.r, p1.c
+				for {
+					if _, ok := m[Point{r, c}]; !ok {
+						break
+					}
+					antinodes[Point{r, c}] = true
+					r, c = r-dr, c-dc
+				}
+			}
+		}
+	}
+	fmt.Println("part 2:", len(antinodes))
 }
 
 type Point struct {
