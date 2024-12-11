@@ -44,15 +44,15 @@ func main() {
 			sumScore += walkGraph(g, r, c, visited, lookup)
 		}
 	}
-	fmt.Println("part 1:", sumScore) // 661 is too high
+	fmt.Println("part 2:", sumScore)
 }
 
 func walkGraph(g map[Point]map[Point]bool, r, c int, visited map[Point]bool, lookup map[Point]int) int {
 	p := Point{r, c}
-	if visited[p] {
-		return 0
-	}
-	visited[p] = true
+	// if visited[p] {
+	// 	return 0
+	// }
+	// visited[p] = true
 	if lookup[p] == 9 {
 		return 1
 	}
