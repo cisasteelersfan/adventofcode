@@ -5,6 +5,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func main() {
@@ -21,13 +22,21 @@ func main() {
 		robots[i] = Robot{right, down, Point{x, y}}
 	}
 
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 10000; i++ {
 		for i, r := range robots {
 			newX := (r.x + r.p.x + width) % width
 			newY := (r.y + r.p.y + height) % height
 			r.p.x = newX
 			r.p.y = newY
 			robots[i] = r
+		}
+		if i > 1000 {
+			b, interesting := getBoard(width, height, robots)
+			if !interesting {
+				continue
+			}
+			fmt.Printf("iteration: %d\n%s", i+1, b)
+			time.Sleep(100 * time.Millisecond)
 		}
 	}
 
@@ -48,7 +57,6 @@ func main() {
 		}
 	}
 	ans := 1
-	fmt.Println("quadrants:", quadrants)
 	for _, count := range quadrants {
 		ans *= count
 	}
@@ -69,6 +77,35 @@ func parse(s string) (x, y, right, down int) {
 func getNum(s string) int {
 	num, _ := strconv.Atoi(s)
 	return num
+}
+
+func getBoard(width, height int, robots []Robot) (string, bool) {
+	arr := make([][]int, height)
+	for row := 0; row < height; row++ {
+		arr[row] = make([]int, width)
+	}
+	for _, r := range robots {
+		arr[r.p.y][r.p.x]++
+	}
+	interesting := false
+	s := strings.Builder{}
+	for row := 0; row < height; row++ {
+		consecutive := 0
+		for col := 0; col < width; col++ {
+			if arr[row][col] > 0 {
+				s.WriteRune('x')
+				consecutive++
+				if consecutive > 10 {
+					interesting = true
+				}
+			} else {
+				s.WriteRune('.')
+				consecutive = 0
+			}
+		}
+		s.WriteRune('\n')
+	}
+	return s.String(), interesting
 }
 
 type Point struct {
