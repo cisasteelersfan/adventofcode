@@ -14,14 +14,14 @@ func main() {
 		m[getNum(numStr)]++
 	}
 
-	for i := 0; i < 25; i++ {
+	for i := 0; i < 75; i++ {
 		m = split(m)
 	}
 	ans := 0
 	for _, count := range m {
 		ans += count
 	}
-	fmt.Println("part 1:", ans)
+	fmt.Println("part 2:", ans)
 }
 
 func split(m map[int]int) map[int]int {
