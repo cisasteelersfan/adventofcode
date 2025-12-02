@@ -35,6 +35,27 @@ func main() {
 		}
 	}
 	fmt.Println("Part 1:", ans)
+
+	curPos = 50
+	ans = 0
+	for _, command := range commands {
+		if command.IsLeft {
+			for i := 0; i < command.Num; i++ {
+				curPos = (curPos - 1) % 100
+				if curPos == 0 {
+					ans++
+				}
+			}
+		} else {
+			for i := 0; i < command.Num; i++ {
+				curPos = (curPos + 1) % 100
+				if curPos == 0 {
+					ans++
+				}
+			}
+		}
+	}
+	fmt.Println("Part 2:", ans)
 }
 
 type Command struct {
