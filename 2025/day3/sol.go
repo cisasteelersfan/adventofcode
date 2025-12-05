@@ -21,11 +21,15 @@ func main() {
 	ans = 0
 	for _, line := range lines {
 		n := make(map[string]int)
-		largest := findLargest(line, n, 12)
+		largest := findLargest2(line, n)
 		ans += largest
 		fmt.Println("largest:", largest)
 	}
 	fmt.Println("Part 2:", ans) // 168_359_209_087_217 is too low
+}
+
+func findLargest2(l, s string, size int, n map[string]int) int {
+	
 }
 
 func findLargest(line string, m map[string]int, size int) int {
@@ -33,17 +37,16 @@ func findLargest(line string, m map[string]int, size int) int {
 		return m[line]
 	}
 	if len(line) == size {
-		m[line] = getNum(line)
 		return getNum(line)
 	}
 	f := string(line[0]) + line[2:]
 	first := findLargest(f, m, size)
-	m[f] = first
 
 	second := findLargest(line[1:], m, size)
-	m[line[1:]] = second
 	third := getNum(line[0:size])
-	return max(max(first, second), third)
+	maximum := max(max(first, second), third)
+	m[line] = maximum
+	return maximum
 }
 
 func getNum(s string) int {
