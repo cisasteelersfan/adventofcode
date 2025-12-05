@@ -27,6 +27,28 @@ func main() {
 		}
 	}
 	fmt.Println("Part 1:", forklifts)
+
+	rollsRemoved := 0
+	changed := true
+	for changed {
+		changed = false
+
+		forklifts := 0
+		for row, line := range lines {
+			for col := range line {
+				if graph[Node{row: row, col: col}] != "@" {
+					continue
+				}
+				if countRolls(graph, row, col) < 4 {
+					forklifts++
+					changed = true
+					graph[Node{row: row, col: col}] = "."
+				}
+			}
+		}
+		rollsRemoved += forklifts
+	}
+	fmt.Println("Part 2:", rollsRemoved)
 }
 
 func countRolls(graph map[Node]string, row, col int) int {
