@@ -32,6 +32,52 @@ func main() {
 		}
 	}
 	fmt.Println("Part 1:", ans)
+
+	blankLine := ""
+	for range len(lines[0]) {
+		blankLine += " "
+	}
+	lines = append(lines, blankLine)
+	lines[len(lines)-1] = lines[len(lines)-2]
+	lines[len(lines)-2] = blankLine
+
+	cols := make([]string, 0)
+	for col := range len(lines[0]) {
+		s := ""
+		for row := range len(lines) {
+			s += string(lines[row][col])
+		}
+		cols = append(cols, s)
+	}
+
+	ans = 0
+	runningProb := 0
+	t := "+"
+	for _, col := range cols {
+		f := strings.Fields(col)
+		if len(f) == 0 { // end of problem
+			ans += runningProb
+			runningProb = 0
+			continue
+		}
+		if f[len(f)-1] == "*" || f[len(f)-1] == "+" {
+			t = f[len(f)-1]
+			if t == "*" {
+				runningProb = 1
+			}
+			if t == "+" {
+				runningProb = 0
+			}
+		}
+		num := getNum(f[0])
+		if t == "*" {
+			runningProb *= num
+		} else {
+			runningProb += num
+		}
+	}
+	ans += runningProb
+	fmt.Println("Part 2:", ans)
 }
 
 func add(nums [][]int, index int) int {
