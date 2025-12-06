@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	dat, _ := os.ReadFile("2025/day5/input.txt")
+	dat, _ := os.ReadFile("2025/day5/small.txt")
 	two := strings.Split(string(dat), "\n\n")
 	ranges := make([]Range, 0)
 	for _, line := range strings.Split(two[0], "\n") {
@@ -30,6 +30,17 @@ func main() {
 		}
 	}
 	fmt.Println("Part 1:", fresh)
+
+	myrange := Range{ranges[0].start, ranges[0].end}
+	for _, r := range ranges {
+		if myrange.start > r.start {
+			myrange.start = r.start
+		}
+		if myrange.end < r.end {
+			myrange.end = r.end
+		}
+	}
+	fmt.Println("Part 2:", myrange.end-myrange.start+1)
 }
 
 type Range struct {
