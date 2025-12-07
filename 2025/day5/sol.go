@@ -3,12 +3,14 @@ package main
 import (
 	"fmt"
 	"os"
+	"slices"
+	"sort"
 	"strconv"
 	"strings"
 )
 
 func main() {
-	dat, _ := os.ReadFile("2025/day5/small.txt")
+	dat, _ := os.ReadFile("2025/day5/input.txt")
 	two := strings.Split(string(dat), "\n\n")
 	ranges := make([]Range, 0)
 	for _, line := range strings.Split(two[0], "\n") {
@@ -31,16 +33,40 @@ func main() {
 	}
 	fmt.Println("Part 1:", fresh)
 
-	myrange := Range{ranges[0].start, ranges[0].end}
+	// stack blocks!
+	starts := make(map[int]int)
+	stops := make(map[int]int)
 	for _, r := range ranges {
-		if myrange.start > r.start {
-			myrange.start = r.start
+		starts[r.start]++
+		stops[r.end]++
+	}
+	all := make([]int, 0)
+	for key := range starts {
+		all = append(all, key)
+	}
+	for key := range stops {
+		all = append(all, key)
+	}
+	sort.Ints(all)
+	all = slices.Compact(all)
+	depth := 0
+	curStart := 0
+	total := 0
+	for _, key := range all {
+		if starts[key] > 0 {
+			if depth == 0 {
+				curStart = key
+			}
+			depth += starts[key]
 		}
-		if myrange.end < r.end {
-			myrange.end = r.end
+		if stops[key] > 0 {
+			depth -= stops[key]
+			if depth == 0 {
+				total += (key - curStart + 1)
+			}
 		}
 	}
-	fmt.Println("Part 2:", myrange.end-myrange.start+1)
+	fmt.Println("Part 2:", total)
 }
 
 type Range struct {
