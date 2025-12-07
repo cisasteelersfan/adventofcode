@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	dat, _ := os.ReadFile("2025/day3/small.txt")
+	dat, _ := os.ReadFile("2025/day3/input.txt")
 	lines := strings.Split(string(dat), "\n")
 
 	ans := 0
@@ -20,16 +20,28 @@ func main() {
 
 	ans = 0
 	for _, line := range lines {
-		n := make(map[string]int)
-		largest := findLargest2(line, n)
+		largest := getNum(findLargestLeftOf(line, 12))
 		ans += largest
 		fmt.Println("largest:", largest)
 	}
 	fmt.Println("Part 2:", ans) // 168_359_209_087_217 is too low
 }
 
-func findLargest2(l, s string, size int, n map[string]int) int {
-	
+func findLargestLeftOf(l string, size int) string {
+	if size == 1 {
+		return maxstring(l)
+	}
+	considering := l[0 : len(l)-size+1]
+	m := maxstring(considering)
+	return m + findLargestLeftOf(l[strings.Index(l, m)+1:], size-1)
+}
+
+func maxstring(l string) string {
+	m := 0
+	for _, r := range l {
+		m = max(m, getNum(string(r)))
+	}
+	return strconv.Itoa(m)
 }
 
 func findLargest(line string, m map[string]int, size int) int {
