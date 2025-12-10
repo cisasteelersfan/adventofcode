@@ -37,14 +37,16 @@ func main() {
 		for k := range n {
 			twoNodes = append(twoNodes, k)
 		}
-		// add all neighbors of twonodes[1]
-		for key := range nodes[twoNodes[1]] {
-			nodes[twoNodes[0]][key] = true
-			nodes[key][twoNodes[0]] = true
+		a, b := twoNodes[0], twoNodes[1]
+		// connect a and b: add all neighbors of a to b, and vice versa
+		for aneighbors := range nodes[a] {
+			for bneighbors := range nodes[b] {
+				nodes[aneighbors][bneighbors] = true
+				nodes[bneighbors][aneighbors] = true
+			}
 		}
-		for key := range nodes[twoNodes[0]] {
-			nodes[twoNodes[1]][key] = true
-			nodes[key][twoNodes[1]] = true
+		if len(nodes[a]) != len(nodes[b]) {
+			fmt.Println("we have a problem")
 		}
 	}
 	// remove duplicates
