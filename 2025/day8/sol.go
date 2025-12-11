@@ -39,15 +39,7 @@ func main() {
 		}
 		a, b := twoNodes[0], twoNodes[1]
 		// connect a and b: add all neighbors of a to b, and vice versa
-		for aneighbors := range nodes[a] {
-			for bneighbors := range nodes[b] {
-				nodes[aneighbors][bneighbors] = true
-				nodes[bneighbors][aneighbors] = true
-			}
-		}
-		if len(nodes[a]) != len(nodes[b]) {
-			fmt.Println("we have a problem")
-		}
+		connnect(a, b, nodes)
 	}
 	// remove duplicates
 	newNodes := make(map[string]map[string]bool)
@@ -71,6 +63,36 @@ func main() {
 	sort.Ints(sizes)
 	ans := sizes[len(sizes)-1] * sizes[len(sizes)-2] * sizes[len(sizes)-3]
 	fmt.Println("Part 1:", ans) // 7452 too low
+
+	// keep connecting until size == len(lines)
+	for i := goalConnections; ; i++ {
+		n := distanceToNodes[keys[i]]
+		twoNodes := make([]string, 0)
+		for k := range n {
+			twoNodes = append(twoNodes, k)
+		}
+		a, b := twoNodes[0], twoNodes[1]
+		// connect a and b: add all neighbors of a to b, and vice versa
+		connnect(a, b, nodes)
+		if len(nodes[a]) == len(lines) {
+			fmt.Println("Part 2:", getX(a)*getX(b))
+			break
+		}
+	}
+}
+
+func getX(line string) int {
+	split := strings.Split(line, ",")
+	return getNum(split[0])
+}
+
+func connnect(a, b string, nodes map[string]map[string]bool) {
+	for aneighbors := range nodes[a] {
+		for bneighbors := range nodes[b] {
+			nodes[aneighbors][bneighbors] = true
+			nodes[bneighbors][aneighbors] = true
+		}
+	}
 }
 
 func getDistance(i, j string) int {
